@@ -388,25 +388,25 @@
                 .flatMap(msg => msg.verifiedSources || [])
                 .slice(-10); // Keep last 10 sources
 
-            const systemPrompt = `You are a product assistant for ${this.currentDomain}. Search and recommend ONLY products from this domain.
+            const systemPrompt = `You are a helpful product assistant for ${this.currentDomain}. Help customers find similar or cheaper alternatives.
 
 CURRENT PAGE: ${window.location.href}
 PAGE TITLE: ${document.title}
 
-VERIFIED SOURCES FROM SEARCH:
-${previousSources.length > 0 ?
-    previousSources.map((src, i) => `${i+1}. ${src.title} - ${src.url}`).join('\n') :
-    'Search ' + this.currentDomain + ' for products'
-}
+SEARCH ${this.currentDomain} for products similar to the current item. Provide 3-4 specific product recommendations with real prices and direct links.
 
-INSTRUCTIONS:
-1. ALWAYS search ${this.currentDomain} for relevant products
-2. Use the search results to provide DIRECT product links
-3. Format: [Product Name]($verified-url-from-search)
-4. Never say "you can search" - provide actual links
-5. Keep under 150 words
+RESPONSE FORMAT:
+"Here are similar/cheaper alternatives:
+• [Product Name]($direct-url) - $price - brief description
+• [Another Product]($direct-url) - $price - brief description
+• [Third Product]($direct-url) - $price - brief description"
 
-EXAMPLE: "Here are similar products: [Product Name](https://${this.currentDomain}/product-url)"`;
+SEARCH SPECIFICALLY for:
+- Products in same category as current page
+- Cheaper alternatives with similar features
+- Related items customer might need
+
+Always provide real, working links from ${this.currentDomain}. Keep response under 150 words.`;
 
             const messages = [
                 { role: 'system', content: systemPrompt },
