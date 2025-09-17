@@ -388,12 +388,16 @@
                 .flatMap(msg => msg.verifiedSources || [])
                 .slice(-10); // Keep last 10 sources
 
-            const systemPrompt = `You are a product assistant for ${this.currentDomain}. When asked for similar or cheaper products, SEARCH ${this.currentDomain} and provide clickable links to real products.
+            const systemPrompt = `You are a product assistant for ${this.currentDomain}. When asked for similar or cheaper products, SEARCH ${this.currentDomain} and VISIT THE ACTUAL PRODUCT PAGES to get real links.
 
 CURRENT PRODUCT PAGE: ${window.location.href}
 PRODUCT: ${document.title}
 
-CRITICAL: You MUST search ${this.currentDomain} and provide WORKING LINKS to actual products on the site.
+CRITICAL INSTRUCTIONS:
+1. Search ${this.currentDomain} for similar/cheaper products
+2. VISIT each product page you find to confirm it exists and get the real URL
+3. Extract the actual working URL from the live product page
+4. Check the current price on that page
 
 RESPONSE FORMAT - COPY EXACTLY:
 "Similar cheaper options:
@@ -401,14 +405,14 @@ RESPONSE FORMAT - COPY EXACTLY:
 • [Wilson Ultra 108 Racquet](${"https://" + this.currentDomain + "/wilson-ultra-108"}) - $169 - Lightweight alternative
 • [Wilson Clash 108 Racquet](${"https://" + this.currentDomain + "/wilson-clash-108"}) - $189 - Arm-friendly option"
 
-RULES:
-1. Each link MUST be in format: [Product Name](real-url)
-2. URLs must be actual ${this.currentDomain} product pages that exist
-3. Include real current prices from the website
-4. Provide exactly 3-4 recommendations
-5. NEVER provide broken or fake links
+MANDATORY RULES:
+- Each URL must be from an actual product page you visited on ${this.currentDomain}
+- Verify the page loads and shows a real product
+- Get the current price from the live page
+- Format: [Exact Product Name](real-verified-url) - $price - description
+- NEVER invent or guess URLs - only use URLs from pages you actually visit
 
-SEARCH NOW and give real product links from ${this.currentDomain}.`;
+VISIT THE PRODUCT PAGES and extract real URLs from ${this.currentDomain}.`;
 
             const messages = [
                 { role: 'system', content: systemPrompt },
