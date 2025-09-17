@@ -388,27 +388,27 @@
                 .flatMap(msg => msg.verifiedSources || [])
                 .slice(-10); // Keep last 10 sources
 
-            const systemPrompt = `You are a product assistant for ${this.currentDomain}. When asked for similar or cheaper products, SEARCH ${this.currentDomain} and provide SPECIFIC product recommendations.
+            const systemPrompt = `You are a product assistant for ${this.currentDomain}. When asked for similar or cheaper products, SEARCH ${this.currentDomain} and provide clickable links to real products.
 
 CURRENT PRODUCT PAGE: ${window.location.href}
 PRODUCT: ${document.title}
 
-REQUIRED: Search ${this.currentDomain} RIGHT NOW for similar/cheaper alternatives to this product.
+CRITICAL: You MUST search ${this.currentDomain} and provide WORKING LINKS to actual products on the site.
 
-RESPONSE MUST INCLUDE:
-3-4 specific products with:
-- Exact product names from ${this.currentDomain}
-- Real prices currently listed
-- Direct working links to product pages
-- Brief 1-sentence description
-
-FORMAT EXAMPLE:
+RESPONSE FORMAT - COPY EXACTLY:
 "Similar cheaper options:
-• [Wilson Pro Staff 97]($direct-link) - $199 - Classic control racquet with similar feel
-• [Wilson Ultra 108]($direct-link) - $169 - Lightweight alternative with comfort
-• [Wilson Clash 108]($direct-link) - $189 - Arm-friendly option for all-court play"
+• [Wilson Pro Staff 97 Racquet](${"https://" + this.currentDomain + "/wilson-pro-staff-97"}) - $199 - Classic control racquet
+• [Wilson Ultra 108 Racquet](${"https://" + this.currentDomain + "/wilson-ultra-108"}) - $169 - Lightweight alternative
+• [Wilson Clash 108 Racquet](${"https://" + this.currentDomain + "/wilson-clash-108"}) - $189 - Arm-friendly option"
 
-SEARCH ${this.currentDomain} for actual products. NEVER say you can't find alternatives. Always provide real links and current prices.`;
+RULES:
+1. Each link MUST be in format: [Product Name](real-url)
+2. URLs must be actual ${this.currentDomain} product pages that exist
+3. Include real current prices from the website
+4. Provide exactly 3-4 recommendations
+5. NEVER provide broken or fake links
+
+SEARCH NOW and give real product links from ${this.currentDomain}.`;
 
             const messages = [
                 { role: 'system', content: systemPrompt },
@@ -455,32 +455,8 @@ SEARCH ${this.currentDomain} for actual products. NEVER say you can't find alter
                     domain: result.domain
                 }));
 
-                // Replace any AI-generated links with real verified links
-                let processedResponse = botResponse;
-                if (verifiedSources.length > 0) {
-                    // Find markdown links in the response and replace with verified URLs
-                    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-                    let match;
-                    let processedText = botResponse;
-                    const usedUrls = new Set();
-
-                    while ((match = linkRegex.exec(botResponse)) !== null) {
-                        const linkText = match[1];
-                        // Find a verified source that matches the link text or is related
-                        const matchingSource = verifiedSources.find(source =>
-                            !usedUrls.has(source.url) && (
-                                source.title.toLowerCase().includes(linkText.toLowerCase().slice(0, 10)) ||
-                                linkText.toLowerCase().includes(source.title.toLowerCase().slice(0, 10))
-                            )
-                        );
-
-                        if (matchingSource) {
-                            processedText = processedText.replace(match[0], `[${linkText}](${matchingSource.url})`);
-                            usedUrls.add(matchingSource.url);
-                        }
-                    }
-                    processedResponse = processedText;
-                }
+                // The AI should now generate proper markdown links directly
+                const processedResponse = botResponse;
 
                 this.conversationHistory.push({
                     role: 'assistant',
