@@ -382,16 +382,31 @@
                 content: userMessage
             });
 
-            const systemPrompt = `You are a webshop product assistant. You must only recommend and provide product details from the webshop domain: ${this.currentDomain}. Never recommend products from other domains or sources. Use your web search functionality only within this domain.
+            // Extract verified sources from previous search results if any
+            const previousSources = this.conversationHistory
+                .filter(msg => msg.role === 'assistant' && msg.verifiedSources)
+                .flatMap(msg => msg.verifiedSources || [])
+                .slice(-10); // Keep last 10 sources
 
-The user is currently viewing this webpage: ${window.location.href}
-Page title: ${document.title}
+            const systemPrompt = `You are a webshop product assistant for ${this.currentDomain}. You must ONLY recommend products from this domain using VERIFIED sources.
 
-You MUST browse and analyze this URL (${window.location.href}) to understand what product or page the user is currently looking at. Read the page content, extract product details, specifications, and context.
+CURRENT PAGE: ${window.location.href}
+PAGE TITLE: ${document.title}
 
-When the user asks about "similar products" or recommendations, use the information from the current page to provide relevant suggestions for that specific product. Do not ask "what product are you referring to" - use the context from the page they are viewing.
+VERIFIED SOURCES FROM SEARCH:
+${previousSources.length > 0 ?
+    previousSources.map((src, i) => `${i+1}. ${src.title} - ${src.url}`).join('\n') :
+    'No previous verified sources available.'
+}
 
-When providing links, format them in markdown syntax like [Link Text](URL). Always include clickable hyperlinks to the relevant product pages on this webshop.`;
+INSTRUCTIONS:
+1. For product recommendations, ONLY use links from the VERIFIED SOURCES listed above
+2. If no verified sources match the query, search ${this.currentDomain} and use the new search results
+3. Format links as [Product Name](verified-url) using ONLY real URLs from verified sources
+4. Keep responses concise - under 150 words
+5. Never invent or fabricate product links
+
+When providing recommendations, cite the actual sources used.`;
 
             const messages = [
                 { role: 'system', content: systemPrompt },
@@ -429,9 +444,18 @@ When providing links, format them in markdown syntax like [Link Text](URL). Alwa
 
                 const botResponse = data.choices[0].message.content;
 
+                // Extract verified search results for real links
+                const searchResults = data.search_results || [];
+                const verifiedSources = searchResults.map(result => ({
+                    title: result.title,
+                    url: result.url,
+                    domain: result.domain
+                }));
+
                 this.conversationHistory.push({
                     role: 'assistant',
-                    content: botResponse
+                    content: botResponse,
+                    verifiedSources: verifiedSources
                 });
 
                 if (this.conversationHistory.length > 20) {
