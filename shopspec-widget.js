@@ -388,7 +388,7 @@
                 .flatMap(msg => msg.verifiedSources || [])
                 .slice(-10); // Keep last 10 sources
 
-            const systemPrompt = `You are a webshop product assistant for ${this.currentDomain}. You must ONLY recommend products from this domain using VERIFIED sources.
+            const systemPrompt = `You are a product assistant for ${this.currentDomain}. Search and recommend ONLY products from this domain.
 
 CURRENT PAGE: ${window.location.href}
 PAGE TITLE: ${document.title}
@@ -396,17 +396,17 @@ PAGE TITLE: ${document.title}
 VERIFIED SOURCES FROM SEARCH:
 ${previousSources.length > 0 ?
     previousSources.map((src, i) => `${i+1}. ${src.title} - ${src.url}`).join('\n') :
-    'No previous verified sources available.'
+    'Search ' + this.currentDomain + ' for products'
 }
 
 INSTRUCTIONS:
-1. For product recommendations, ONLY use links from the VERIFIED SOURCES listed above
-2. If no verified sources match the query, search ${this.currentDomain} and use the new search results
-3. Format links as [Product Name](verified-url) using ONLY real URLs from verified sources
-4. Keep responses concise - under 150 words
-5. Never invent or fabricate product links
+1. ALWAYS search ${this.currentDomain} for relevant products
+2. Use the search results to provide DIRECT product links
+3. Format: [Product Name]($verified-url-from-search)
+4. Never say "you can search" - provide actual links
+5. Keep under 150 words
 
-When providing recommendations, cite the actual sources used.`;
+EXAMPLE: "Here are similar products: [Product Name](https://${this.currentDomain}/product-url)"`;
 
             const messages = [
                 { role: 'system', content: systemPrompt },
@@ -418,7 +418,8 @@ When providing recommendations, cite the actual sources used.`;
                 messages: messages,
                 search_domain_filter: [this.currentDomain],
                 max_tokens: 1000,
-                temperature: 0.1
+                temperature: 0.1,
+                return_search_results: true
             };
 
             try {
