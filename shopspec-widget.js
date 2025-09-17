@@ -206,6 +206,7 @@
         constructor() {
             this.apiKey = null;
             this.currentDomain = null;
+            this.currentProduct = null;
             this.conversationHistory = [];
             this.isTyping = false;
             this.init();
@@ -213,6 +214,7 @@
 
         init() {
             this.detectDomain();
+            this.detectProduct();
             this.createWidget();
             this.setupEventListeners();
             this.loadConfiguration();
@@ -228,6 +230,37 @@
             } catch (error) {
                 console.error('ShopSpec: Error detecting domain:', error);
                 this.currentDomain = 'example-shop.com';
+            }
+        }
+
+        detectProduct() {
+            try {
+                // Try to extract product info from page title
+                const title = document.title;
+                const url = window.location.pathname;
+
+                // Look for common product page patterns
+                if (url.includes('/descpage') || url.includes('product') || title.includes(' - ')) {
+                    // Extract product name from title (usually before " - " on tennis-warehouse)
+                    const titleParts = title.split(' - ');
+                    if (titleParts.length > 1 && titleParts[0] !== 'Tennis Warehouse') {
+                        this.currentProduct = titleParts[0].trim();
+                        console.log('ShopSpec: Detected product:', this.currentProduct);
+                    }
+                }
+
+                // Try meta tags
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc && !this.currentProduct) {
+                    const desc = metaDesc.getAttribute('content');
+                    if (desc && desc.length < 200) { // Likely a product description
+                        this.currentProduct = desc.split('.')[0]; // Take first sentence
+                        console.log('ShopSpec: Detected product from meta:', this.currentProduct);
+                    }
+                }
+
+            } catch (error) {
+                console.error('ShopSpec: Error detecting product:', error);
             }
         }
 
@@ -248,8 +281,8 @@
                         <button class="shopspec-close-button" id="shopspec-close-button">×</button>
                     </div>
                     <div class="shopspec-chat-messages" id="shopspec-chat-messages">
-                        <div class="shopspec-message bot">
-                            Hi! I'm your product assistant. I can help you find the perfect products from ${this.currentDomain}. What are you looking for?
+                        <div class="shopspec-message bot" id="initial-message">
+                            Loading...
                         </div>
                     </div>
                     <div class="shopspec-typing-indicator" id="shopspec-typing-indicator">
@@ -271,6 +304,18 @@
             `;
 
             document.body.appendChild(widgetContainer);
+
+            // Set the initial message based on product context
+            this.setInitialMessage();
+        }
+
+        setInitialMessage() {
+            const initialMessageEl = document.getElementById('initial-message');
+            if (this.currentProduct) {
+                initialMessageEl.innerHTML = `Hi! I see you're looking at <strong>${this.currentProduct}</strong>. I'm your product assistant for ${this.currentDomain}. I can help you find similar products, answer questions about this item, or recommend alternatives. What would you like to know?`;
+            } else {
+                initialMessageEl.innerHTML = `Hi! I'm your product assistant. I can help you find the perfect products from ${this.currentDomain}. What are you looking for?`;
+            }
         }
 
         setupEventListeners() {
@@ -381,7 +426,13 @@
                 content: userMessage
             });
 
-            const systemPrompt = `You are a webshop product assistant. You must only recommend and provide product details from the webshop domain: ${this.currentDomain}. Never recommend products from other domains or sources. Use your web search functionality only within this domain. Always include clickable hyperlinks to the relevant product pages on this webshop.`;
+            let systemPrompt = `You are a webshop product assistant. You must only recommend and provide product details from the webshop domain: ${this.currentDomain}. Never recommend products from other domains or sources. Use your web search functionality only within this domain.`;
+
+            if (this.currentProduct) {
+                systemPrompt += ` The user is currently viewing the product: "${this.currentProduct}". Provide context about this product and offer relevant recommendations, comparisons, or answers to questions about it.`;
+            }
+
+            systemPrompt += ` When providing links, format them in markdown syntax like [Link Text](URL). Always include clickable hyperlinks to the relevant product pages on this webshop.`;
 
             const messages = [
                 { role: 'system', content: systemPrompt },
@@ -441,9 +492,12 @@
         addMessage(content, type) {
             const messagesContainer = document.getElementById('shopspec-chat-messages');
 
+            // Convert markdown links to HTML links
+            const htmlContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
             const messageDiv = document.createElement('div');
             messageDiv.className = `shopspec-message ${type}`;
-            messageDiv.innerHTML = content;
+            messageDiv.innerHTML = htmlContent;
 
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
