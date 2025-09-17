@@ -455,9 +455,36 @@ SEARCH ${this.currentDomain} for actual products. NEVER say you can't find alter
                     domain: result.domain
                 }));
 
+                // Replace any AI-generated links with real verified links
+                let processedResponse = botResponse;
+                if (verifiedSources.length > 0) {
+                    // Find markdown links in the response and replace with verified URLs
+                    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+                    let match;
+                    let processedText = botResponse;
+                    const usedUrls = new Set();
+
+                    while ((match = linkRegex.exec(botResponse)) !== null) {
+                        const linkText = match[1];
+                        // Find a verified source that matches the link text or is related
+                        const matchingSource = verifiedSources.find(source =>
+                            !usedUrls.has(source.url) && (
+                                source.title.toLowerCase().includes(linkText.toLowerCase().slice(0, 10)) ||
+                                linkText.toLowerCase().includes(source.title.toLowerCase().slice(0, 10))
+                            )
+                        );
+
+                        if (matchingSource) {
+                            processedText = processedText.replace(match[0], `[${linkText}](${matchingSource.url})`);
+                            usedUrls.add(matchingSource.url);
+                        }
+                    }
+                    processedResponse = processedText;
+                }
+
                 this.conversationHistory.push({
                     role: 'assistant',
-                    content: botResponse,
+                    content: processedResponse,
                     verifiedSources: verifiedSources
                 });
 
@@ -465,7 +492,7 @@ SEARCH ${this.currentDomain} for actual products. NEVER say you can't find alter
                     this.conversationHistory = this.conversationHistory.slice(-20);
                 }
 
-                return botResponse;
+                return processedResponse;
 
             } catch (error) {
                 if (error.name === 'TypeError' && error.message.includes('fetch')) {
