@@ -1,0 +1,226 @@
+/* ShopSpec Chat Widget Styles */
+
+#shopspec-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Chat Button */
+.shopspec-chat-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.shopspec-chat-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.shopspec-chat-button:active {
+    transform: scale(0.95);
+}
+
+/* Chat Window */
+.shopspec-chat-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shopspec-chat-window.open {
+    display: flex;
+}
+
+/* Chat Header */
+.shopspec-chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.shopspec-chat-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.shopspec-close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.shopspec-close-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Chat Messages */
+.shopspec-chat-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+.shopspec-message {
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    border-radius: 18px;
+    max-width: 80%;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.shopspec-message.user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.shopspec-message.bot {
+    background: white;
+    color: #374151;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shopspec-message.typing {
+    background: white;
+    color: #6b7280;
+    font-style: italic;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Chat Input */
+.shopspec-chat-input {
+    padding: 16px;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 8px;
+}
+
+.shopspec-input-field {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 24px;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.shopspec-input-field:focus {
+    border-color: #667eea;
+}
+
+.shopspec-send-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.shopspec-send-button:hover {
+    transform: scale(1.05);
+}
+
+.shopspec-send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Typing Indicator */
+.shopspec-typing-indicator {
+    display: none;
+    padding: 8px 16px;
+    color: #6b7280;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.shopspec-typing-indicator.show {
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .shopspec-chat-window {
+        width: calc(100vw - 40px);
+        height: calc(100vh - 140px);
+        bottom: 80px;
+        right: 20px;
+    }
+
+    #shopspec-widget {
+        bottom: 20px;
+        right: 20px;
+    }
+}
+
+/* Link Styles in Messages */
+.shopspec-message a {
+    color: #667eea;
+    text-decoration: underline;
+}
+
+.shopspec-message.user a {
+    color: #e0e7ff;
+}

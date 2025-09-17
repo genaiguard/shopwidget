@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopSpec Chat Widget</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="shopspec-widget"></div>
+    <script src="widget.js"></script>
+
+    <!-- Demo content for testing -->
+    <div style="padding: 20px; text-align: center; margin-top: 100px;">
+        <h1>Demo Webshop</h1>
+        <p>This is a demo page for testing the ShopSpec chat widget.</p>
+        <p>Domain: <span id="current-domain"></span></p>
+    </div>
+
+    <script>
+        // Display current domain for demo purposes
+        document.getElementById('current-domain').textContent = window.location.hostname;
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "shopspec-widget",
+  "version": "1.0.0",
+  "description": "A lightweight floating chat widget for AI-powered product recommendations using Perplexity AI",
+  "main": "shopspec-widget.js",
+  "scripts": {
+    "build": "echo 'No build step required - shopspec-widget.js is the production file'",
+    "demo": "python3 -m http.server 8000",
+    "test": "echo 'Open demo.html in browser to test'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/shopspec-widget.git"
+  },
+  "keywords": [
+    "chat-widget",
+    "ai",
+    "perplexity",
+    "ecommerce",
+    "product-recommendations",
+    "domain-specific"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/your-username/shopspec-widget/issues"
+  },
+  "homepage": "https://github.com/your-username/shopspec-widget#readme"
+}
